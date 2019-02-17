@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.MenuDao">
+    <resultMap id="menuMapping" type="com.supersong.graduation.bean.Menu">
+        <result column="menu_name" property="menuName" javaType="String"/>
+        <result column="parent_id" property="parentId" javaType="String"/>
+    </resultMap>
+    <insert id="addMenu" parameterType="com.supersong.graduation.bean.Menu">
+        insert into t_menu(id,menu_name,parent_id,create_time,menu_url,menu_level) values(#{id},#{menuName},#{parentId},#{createTime},#{menuUrl},#{menuLevel})
+    </insert>
+    <delete id="deleteMenuById" parameterType="String">
+        delete from t_menu where id = #{id}
+    </delete>
+    <delete id="deleteRoleMenu" parameterType="String">
+        delete from t_role_menu where menu_id = #{menuId}
+    </delete>
+    <update id="updateMenu" parameterType="com.supersong.graduation.bean.Menu">
+        update t_menu set
+        id = #{id}
+        <if test="menuName != null and menuName != ''">
+            ,menu_name = #{menuName}
+        </if>
+        <if test="menuUrl !=null and menuUrl != ''">
+            ,menu_url = #{menuUrl}
+        </if>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+    <select id="getAll" resultType="com.supersong.graduation.bean.Menu">
+        select * from t_menu group by parent_id
+    </select>
+    <select id="checkName" resultType="Integer">
+        select count(1) from t_menu where menu_name = #{menuName}
+        <if test="menuId != null">
+            and id != #{menuId}
+        </if>
+    </select>
+    <select id="getFirstMenuByUserId" resultMap="menuMapping" parameterType="String">
+        SELECT a.* FROM t_menu a JOIN t_role_menu b ON b.menu_id = a.id JOIN t_user_role c ON c.role_id = b.role_id  WHERE a.menu_level = 1 and c.user_id = #{userId}
+    </select>
+    <select id="getSecondMenuByUserId" resultMap="menuMapping" parameterType="String">
+        SELECT a.* FROM t_menu a JOIN t_role_menu b ON b.menu_id = a.id JOIN t_user_role c ON c.role_id = b.role_id  WHERE a.menu_level = 2 and c.user_id = #{userId}
+    </select>
+
+</mapper>

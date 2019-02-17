@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.NewsTypeDao">
+    <resultMap id="NewsTypeMapping" type="com.supersong.graduation.bean.NewsType">
+        <result column="type_name" property="typeName" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+    <insert id="add" parameterType="com.supersong.graduation.bean.NewsType">
+        insert into t_news_type(id,type_name,create_time,remark) values (#{id},#{typeName},#{createTime},#{remark})
+    </insert>
+    <delete id="delete" parameterType="String">
+        delete from t_news_type where id=#{id}
+    </delete>
+    <update id="update" parameterType="com.supersong.graduation.bean.NewsType">
+        update t_news_type set type_name = #{typeName},remark = #{remark} where id = #{id}
+    </update>
+    <select id="getAll" resultMap="NewsTypeMapping">
+        select * from t_news_type order by create_time asc
+    </select>
+    <select id="query" resultMap="NewsTypeMapping" parameterType="String">
+        select * from t_news_type where type_name like '%${query}%'
+    </select>
+
+    <select id="checkName" resultType="Integer">
+        select count(1) from t_news_type where type_name = #{typeName}
+        <if test="id !=null and id !=''">
+            and id != #{id}
+        </if>
+    </select>
+</mapper>

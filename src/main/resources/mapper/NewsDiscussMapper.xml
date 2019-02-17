@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.NewsDiscussDao">
+    <resultMap id="NewsDiscussMapping" type="com.supersong.graduation.bean.NewsDiscuss">
+        <result column="news_id" property="newsId" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+
+    <resultMap id="DiscussFilterMapping" type="com.supersong.graduation.bean.DiscussFilter">
+        <result column="replace_word" property="replaceWord" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+
+    <insert id="addNewsDiscuss" parameterType="com.supersong.graduation.bean.NewsDiscuss">
+        INSERT INTO t_news_discuss(id,news_id,commentTo,toComment,create_time,content) VALUES (#{id},#{newsId},#{commentTo},#{toComment},#{createTime},#{content})
+    </insert>
+
+    <insert id="addDiscussFilter" parameterType="com.supersong.graduation.bean.DiscussFilter">
+        INSERT INTO t_discuss_filter(id,keyword,replace_word,create_time) VALUES (#{id},#{keyword},#{replaceWord},#{createTime})
+    </insert>
+
+    <delete id="deleteNewsDiscuss" parameterType="String">
+        DELETE FROM t_news_discuss WHERE id = #{id}
+    </delete>
+
+    <select id="getDiscussByNewsId" resultMap="NewsDiscussMapping" parameterType="String">
+        SELECT a.*,b.user_name commentToName ,c.user_name toCommentName FROM
+        t_news_discuss a,
+        t_user b,
+        t_user c
+        WHERE a.news_id = #{id} and b.id = a.commentTo and c.id = a.tocomment
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="getDiscussFilter" resultMap="DiscussFilterMapping">
+        SELECT * FROM t_discuss_filter ORDER BY create_time DESC
+    </select>
+</mapper>

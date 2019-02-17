@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.NewsDao">
+    <resultMap id="newsMapping" type="com.supersong.graduation.bean.News">
+        <result column="like_count" property="likeCount" javaType="int"/>
+        <result column="is_important" property="important" javaType="int"/>
+        <result column="first_img" property="firstImg" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+        <result column="content_html" property="contentHtml" javaType="String"/>
+        <result column="modify_time" property="modifyTime" javaType="Date"/>
+    </resultMap>
+    <insert id="addNews" parameterType="com.supersong.graduation.bean.News">
+        insert into t_news(id,first_img,author,type,title,digest,content,view_count,status,like_count,is_important,create_time,content_html,discuss,modify_time) values (
+        #{id},#{firstImg},#{author},#{type},#{title},#{digest},#{content},#{viewCount},#{status},#{likeCount},#{important},#{createTime},#{contentHtml},#{discuss},#{modifyTime}
+        )
+    </insert>
+
+    <insert id="addNewsVisitor" parameterType="com.supersong.graduation.bean.NewsVisitor">
+        INSERT INTO t_visitor(id,user_id,news_id,modify_time) VALUES (#{id},#{userId},#{newsId},#{modifyTime})
+    </insert>
+
+    <insert id="addNewsSupport" parameterType="com.supersong.graduation.bean.NewsSupport">
+        INSERT INTO t_support(id,user_id,news_id,type,cancel,modify_time) VALUES (#{id},#{userId},#{newsId},#{type},#{cancel},#{modifyTime})
+    </insert>
+
+    <delete id="deleteNews" parameterType="String">
+        delete from t_news where id = #{id}
+    </delete>
+    <update id="updateNews" parameterType="com.supersong.graduation.bean.News">
+        update t_news set id = #{id}
+         <if test='title != null and title !=" "'>
+             ,title = #{title}
+         </if>
+        <if test='type !=null and type !=" "'>
+            ,type = #{type}
+        </if>
+        <if test='firstImg !=null and firstImg != " "'>
+            ,first_img = #{firstImg}
+        </if>
+        <if test='author != null and author != " "'>
+            ,author=#{author}
+        </if>
+        <if test='digest != null and digest != " "'>
+            ,digest=#{digest}
+        </if>
+        <if test='content != null and content != " "'>
+            ,content = #{content}
+        </if>
+        <if test="important != null">
+            ,is_important = #{important}
+        </if>
+        <if test="status != null">
+            ,status = #{status}
+        </if>
+        <if test='contentHtml != null and contentHtml != " "'>
+            ,content_html = #{contentHtml}
+        </if>
+        <if test="discuss != null">
+            ,discuss = #{discuss}
+        </if>
+        <if test="modifyTime != null">
+            ,modify_time = #{modifyTime}
+        </if>
+         where id = #{id}
+    </update>
+
+    <update id="updateNewsSupport" parameterType="com.supersong.graduation.bean.NewsSupport">
+        UPDATE t_support SET cancel = #{cancel} WHERE id = #{id}
+    </update>
+
+    <select id="getAll" resultMap="newsMapping">
+        select a.*,b.type_name typeName,c.user_name authorName,d.viewCount
+        from t_news a left JOIN t_news_type b on a.type = b.id left JOIN  t_user c on c.id = a.author left join (select count(1) viewCount, news_id from t_visitor group by news_id) d on a.id = d.news_id
+        order by a.create_time desc
+    </select>
+
+    <select id="getNewsById" resultMap="newsMapping" parameterType="String">
+        select a.*,b.type_name typeName,c.user_name authorName,(select count(1) from t_visitor where news_id = #{id}) viewCount from t_news a left JOIN t_news_type b on a.type = b.id left JOIN  t_user c on c.id = a.author where a.id = #{id}
+    </select>
+
+    <select id="getViewCount" resultType="Integer">
+        select count(1) from t_visitor a where UNIX_TIMESTAMP(a.modify_time) between #{startTime} and #{endTime} and news_id = #{newsId}
+    </select>
+
+    <select id="getLikeCount" resultType="Integer">
+        select count(1) from t_support a where UNIX_TIMESTAMP(a.modify_time) between #{startTime} and #{endTime} and type = 0 and cancel = 0 and news_id = #{newsId}
+    </select>
+
+    <select id="getDislikeCount" resultType="Integer">
+        select count(1) from t_support a where UNIX_TIMESTAMP(a.modify_time) between #{startTime} and #{endTime} and type = 1 and cancel = 0 and news_id = #{newsId}
+    </select>
+
+    <select id="checkNewsCanDiscuss" resultType="Integer" parameterType="String">
+        SELECT COUNT(1) FROM t_news  WHERE id = #{id} and discuss = 1
+    </select>
+
+    <select id="checkUserIsSupport" resultType="Integer">
+        SELECT COUNT(1) FROM t_support WHERE user_id = #{userId} and news_id = #{newsId} and cancel = 0
+    </select>
+
+    <select id="getNewsByQuery" parameterType="Map" resultMap="newsMapping">
+        select a.*,b.type_name typeName,c.user_name authorName from t_news a left JOIN t_news_type b on a.type = b.id left JOIN  t_user c on c.id = a.author WHERE 1=1
+        <if test="map.title != null and map.title !=''">
+            and a.title LIKE '%${map.title}%'
+        </if>
+        <if test="map.author != null and map.author != ''">
+            AND a.author LIKE '%${map.author}%'
+        </if>
+        <if test="map.type != null and map.type != ''">
+            AND b.id = #{map.type}
+        </if>
+        <if test="map.startTime !=null and map.startTime != 0 and map.endTime != null and map.endTime != null">
+            AND UNIX_TIMESTAMP(a.create_time) BETWEEN #{map.startTime} AND #{map.endTime}
+        </if>
+        order by a.create_time desc
+    </select>
+
+    <select id="getNewsImportant" resultMap="newsMapping">
+        select a.*,b.type_name typeName,c.user_name authorName from t_news a left JOIN t_news_type b on a.type = b.id left JOIN  t_user c on c.id = a.author WHERE a.important = 1 ORDER BY a.modify_time DESC
+    </select>
+
+    <select id="getNewsNotImportant" resultMap="newsMapping">
+        select a.*,b.type_name typeName,c.user_name authorName from t_news a left JOIN t_news_type b on a.type = b.id left JOIN  t_user c on c.id = a.author WHERE a.important = 0 ORDER BY a.modify_time DESC
+    </select>
+
+</mapper>

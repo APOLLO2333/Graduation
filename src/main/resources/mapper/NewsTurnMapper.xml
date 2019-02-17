@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.NewsTurnDao">
+    <resultMap id="NewTurnMapping" type="com.supersong.graduation.bean.NewTurn">
+        <result column="img_url" javaType="String" property="imgUrl"/>
+        <result column="r_url" javaType="String" property="rUrl"/>
+        <result column="news_title" javaType="String" property="newsTitle"/>
+    </resultMap>
+    <insert id="add" parameterType="com.supersong.graduation.bean.NewTurn">
+        insert into t_news_turn (id,img_url,r_url,rank,news_title,status,remark) values (#{id},#{imgUrl},#{rUrl},#{rank},#{newsTitle},#{status},#{remark})
+    </insert>
+    
+    <insert id="addList">
+        <!--<selectKey keyProperty="id" resultType="String" order="BEFORE">-->
+            <!--select uuid() as id from  dual-->
+        <!--</selectKey>-->
+        insert into t_news_turn (id,img_url,r_url,rank,news_title,status,remark) values
+        <foreach collection="list" item="item" index="index"  separator=",">
+            (#{item.id},#{item.imgUrl},#{item.rUrl},#{item.rank},#{item.newsTitle},#{item.status},#{item.remark})
+        </foreach>
+    </insert>
+    
+    <delete id="delete" parameterType="String">
+        delete from t_news_turn where id = #{id}
+    </delete>
+
+    <delete id="deleteAll">
+        delete from t_news_turn
+    </delete>
+
+    <update id="update" parameterType="com.supersong.graduation.bean.NewTurn">
+        update t_news_turn set id = #{id}
+        <if test="imgUrl!=null and imgUrl !=''">
+            ,img_url = #{imgUrl}
+        </if>
+        <if test="rUrl !=null and rUrl !=''">
+            ,r_url = #{rUrl}
+        </if>
+        <if test="rank != null">
+            , rank = #{rank}
+        </if>
+        <if test="newsTitle != null and newsTitle!= ''">
+            , news_title = #{newsTitle}
+        </if>
+        <if test="status != null">
+            , status = #{status}
+        </if>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+    <select id="getAll" resultMap="NewTurnMapping">
+        select * from t_news_turn order by rank asc
+    </select>
+    <select id="checkName" resultType="Integer" parameterType="String">
+        select count(1) from t_news_turn where news_title = #{newsTitle}
+        <if test="id != null">
+            and id != #{id}
+        </if>
+    </select>
+</mapper>

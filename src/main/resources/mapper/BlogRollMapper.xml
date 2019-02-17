@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.BlogRollDao">
+    <resultMap id="BlogRollMapping" type="com.supersong.graduation.bean.BlogRoll">
+        <result column="link_url" property="linkUrl" javaType="String"/>
+    </resultMap>
+    <insert id="addList">
+        insert into t_blogroll (name,link_url,remark) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name},#{item.linkUrl},#{item.remark})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAll">
+        delete from t_blogroll
+    </delete>
+
+    <select id="getAll" resultMap="BlogRollMapping">
+        select * from t_blogroll order by id asc
+    </select>
+</mapper>

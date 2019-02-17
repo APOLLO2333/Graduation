@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.UserDao">
+    <resultMap id="userMapping" type="com.supersong.graduation.bean.User">
+        <result column="user_name" property="userName" javaType="String"/>
+        <result column="real_name" property="realName" javaType="String"/>
+        <result column="create_time" property="createDate" javaType="Date"/>
+        <result column="user_img" property="userImg" javaType="String"/>
+        <result column="user_qq" property="userQq" javaType="String"/>
+        <result column="login_time" property="loginTime" javaType="Date"/>
+    </resultMap>
+
+    <resultMap id="menuMapping" type="com.supersong.graduation.bean.Menu">
+        <result column="menu_name" property="menuName" javaType="String"/>
+        <result column="parent_id" property="parentId" javaType="String"/>
+    </resultMap>
+
+    <resultMap id="roleMapping" type="com.supersong.graduation.bean.Role">
+        <result column="role_name" property="roleName" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+    
+    <select id="getUserCount" resultType="Integer">
+        select count(1) from t_user
+    </select>
+    <insert id="addUser" parameterType="com.supersong.graduation.bean.User">
+        insert into  t_user(id,user_name,real_name,gender,create_time,user_img,phone,user_qq,password,email,status) values (
+                          #{id},#{userName},#{realName},#{gender},#{createDate},#{userImg},#{phone},#{userQq},#{password},#{email},#{status}
+        )
+    </insert>
+    <delete id="deleteUser" parameterType="String">
+        delete from t_user where id = #{userId}
+    </delete>
+    <delete id="deleteUserRole" parameterType="String">
+        delete from t_user_role where user_id = #{userId}
+    </delete>
+    <update id="updateUser" parameterType="com.supersong.graduation.bean.User">
+        update t_user set user_name = #{userName},real_name = #{realName},gender = #{gender},user_img = #{userImg},phone = #{phone},user_qq = #{userQq},status = #{status}
+         ,email = #{email}
+          <if test="password !=null and password != ''">
+              ,password = #{password}
+          </if>
+        <if test="loginTime != null">
+            ,login_time = #{loginTime}
+        </if>
+          where id = #{id}
+    </update>
+    <select id="checkName" resultType="Integer">
+        select count(1) from t_user where user_name = #{userName}
+        <if test="userId != null">
+            and id != #{userId}
+        </if>
+    </select>
+    <select id="getAll" resultMap="userMapping">
+        select id,user_name,real_name,gender,create_time,user_img,email,phone,user_qq,status,login_time from t_user order by create_time asc
+    </select>
+
+    <select id="getUserByName" resultMap="userMapping" parameterType="String">
+        select * from t_user where user_name = #{userName}
+    </select>
+
+    <select id="getUserByEmail" resultMap="userMapping" parameterType="String">
+        select * from t_user where email = #{email}
+    </select>
+    <select id="login" resultMap="userMapping" parameterType="String">
+        select * from t_user where email = #{email} and status = 1
+    </select>
+    <select id="loginByPhone" resultMap="userMapping" parameterType="String">
+        select * from t_user where phone = #{phone} and status = 1
+    </select>
+    <select id="checkPhone" resultType="Integer">
+        select count(1) from t_user where phone = #{phone}
+        <if test="userId != null">
+            and id != #{userId}
+        </if>
+    </select>
+    <select id="checkEmail" resultType="Integer">
+        select count(1) from t_user where email = #{email}
+        <if test="userId != null">
+            and id != #{userId}
+        </if>
+    </select>
+
+    <select id="queryUser" resultMap="userMapping" parameterType="Map">
+        select * from t_user where 1=1
+        <if test="map.email != null">
+            and email like '%${map.email}%'
+        </if>
+        <if test="map.qq != null">
+            and user_qq like '%${map.qq}%'
+        </if>
+        <if test="map.realName != null">
+            and real_name like '%${map.realName}%'
+        </if>
+        <if test="map.phone != null">
+            and phone like '%${map.phone}%'
+        </if>
+        <if test="map.userName !=null">
+            and user_name like '%${map.userName}%'
+        </if>
+        order by create_time asc
+    </select>
+    
+    <select id="getMenuByUserId" resultMap="menuMapping" parameterType="String">
+      SELECT a.* FROM t_menu a JOIN t_role_menu b on a.id = b.menu_id JOIN t_user_role c on c.role_id = b.role_id WHERE c.user_id = #{userId}
+    </select>
+
+    <select id="getRoleByUserId" resultMap="roleMapping" parameterType="String">
+        select a.* from t_role a join t_user_role b on a.id = b.role_id where b.user_id = #{userId}
+    </select>
+</mapper>

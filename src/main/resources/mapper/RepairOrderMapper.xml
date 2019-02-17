@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.RepairOrderDao">
+    <resultMap id="repairOrderMapping" type="com.supersong.graduation.bean.RepairOrder">
+        <result column="user_id" property="userId" javaType="String"/>
+        <result column="site_id" property="siteId" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+        <result column="update_time" property="updateTime" javaType="Date"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.supersong.graduation.bean.RepairOrder">
+        insert into t_repairorder(id,user_id,name,remark,create_time,update_time,status,site_id)
+        values (#{id},#{userId},#{name},#{remark},#{createTime},#{updateTime},#{status},#{siteId})
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        delete from t_repairorder where  id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.supersong.graduation.bean.RepairOrder">
+        update t_repairorder set update_time = #{updateTime}
+        <if test="name != null and name != ''">
+            ,name = #{name}
+        </if>
+        <if test="remark !=null and remark != ''">
+            ,remark = #{remark}
+        </if>
+        <if test="status != null">
+            ,status = #{status}
+        </if>
+        <if test="siteId != null and siteId != ''">
+            ,site_id = #{siteId}
+        </if>
+        where id = #{id}
+    </update>
+
+    <select id="getRepairOrderByStatus" resultMap="repairOrderMapping" parameterType="Integer">
+        select * from t_repairorder where status = #{status}
+    </select>
+</mapper>

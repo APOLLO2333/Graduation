@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.WebLogDao">
+    <resultMap id="webLogMapping" type="com.supersong.graduation.bean.WebLog">
+        <result column="web_url" property="webUrl" javaType="String"/>
+        <result column="http_method" property="httpMethod" javaType="String"/>
+        <result column="ip_address" property="ipAddress" javaType="String"/>
+        <result column="class_method" property="classMethod" javaType="String"/>
+        <result column="input_value" property="inputValue" javaType="String"/>
+        <result column="output_value" property="outputValue" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.supersong.graduation.bean.WebLog">
+        insert into t_weblog (web_url,http_method,ip_address,class_method,input_value,output_value,create_time) values (#{webUrl},#{httpMethod},#{ipAddress},#{classMethod},#{inputValue},#{outputValue},#{createTime})
+    </insert>
+
+    <select id="getAll" resultMap="webLogMapping">
+        select * from t_weblog where UNIX_TIMESTAMP(create_time) BETWEEN #{startTime} AND #{endTime}
+    </select>
+</mapper>

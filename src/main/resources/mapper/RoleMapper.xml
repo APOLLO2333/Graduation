@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.supersong.graduation.dao.RoleDao">
+    <resultMap id="roleMapping" type="com.supersong.graduation.bean.Role">
+        <result column="role_name" property="roleName" javaType="String"/>
+        <result column="create_time" property="createTime" javaType="Date"/>
+    </resultMap>
+    <insert id="addRole" parameterType="com.supersong.graduation.bean.Role">
+        insert into t_role(id,role_name,create_time,remark) values (#{id},#{roleName},#{createTime},#{remark})
+    </insert>
+    <insert id="addMenuToRole">
+        <selectKey resultType="String" keyProperty="id" order="BEFORE">
+            select uuid() from dual
+        </selectKey>
+        insert into t_role_menu(id,role_id,menu_id) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{id},#{roleId},#{item.id}
+            )
+        </foreach>
+    </insert>
+    <delete id="deleteRole" parameterType="String">
+        delete from t_role where id = #{roleId}
+    </delete>
+    <delete id="deleteRoleMenu" parameterType="String">
+        delete from t_role_menu where role_id = #{roleId}
+    </delete>
+    <update id="updateRole" parameterType="com.supersong.graduation.bean.Role">
+        update t_role set role_name = #{roleName},remark=#{remark} where id = #{id}
+    </update>
+    <select id="getAll" resultMap="roleMapping">
+        select * from t_role
+    </select>
+    <select id="checkName" resultType="Integer" parameterType="String">
+        select count(1) from t_role where role_name = #{roleName}
+        <if test="roleId != null">
+            and id != #{1}
+        </if>
+    </select>
+</mapper>
